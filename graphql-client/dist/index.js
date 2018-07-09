@@ -2,22 +2,22 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-import { ApolloClient } from "apollo-client";
-import { split, from } from "apollo-link";
-import { HttpLink } from "apollo-link-http";
-import { createUploadLink } from "apollo-upload-client";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { SubscriptionClient } from "subscriptions-transport-ws";
-import MessageTypes from "subscriptions-transport-ws/dist/message-types";
-import { WebSocketLink } from "apollo-link-ws";
-import { getMainDefinition } from "apollo-utilities";
-import { createPersistedQueryLink } from "apollo-link-persisted-queries";
-import { setContext } from "apollo-link-context";
-import { withClientState } from "apollo-link-state";
-import { w3cwebsocket as W3CWebSocket } from "websocket";
-import * as AbsintheSocket from "@absinthe/socket";
-import { createAbsintheSocketLink } from "@absinthe/socket-apollo-link";
-import { Socket as PhoenixSocket } from "phoenix"; // Create the apollo client
+import { ApolloClient } from 'apollo-client';
+import { split, from } from 'apollo-link';
+import { HttpLink } from 'apollo-link-http';
+import { createUploadLink } from 'apollo-upload-client';
+import { InMemoryCache } from 'apollo-cache-inmemory';
+import { SubscriptionClient } from 'subscriptions-transport-ws';
+import MessageTypes from 'subscriptions-transport-ws/dist/message-types';
+import { WebSocketLink } from 'apollo-link-ws';
+import { getMainDefinition } from 'apollo-utilities';
+import { createPersistedQueryLink } from 'apollo-link-persisted-queries';
+import { setContext } from 'apollo-link-context';
+import { withClientState } from 'apollo-link-state';
+import { w3cwebsocket as W3CWebSocket } from 'websocket';
+import * as AbsintheSocket from '@absinthe/socket';
+import { createAbsintheSocketLink } from '@absinthe/socket-apollo-link';
+import { Socket as PhoenixSocket } from 'phoenix'; // Create the apollo client
 
 export function createApolloClient(_ref) {
   var httpEndpoint = _ref.httpEndpoint,
@@ -26,7 +26,7 @@ export function createApolloClient(_ref) {
       _ref$uploadEndpoint = _ref.uploadEndpoint,
       uploadEndpoint = _ref$uploadEndpoint === void 0 ? null : _ref$uploadEndpoint,
       _ref$tokenName = _ref.tokenName,
-      tokenName = _ref$tokenName === void 0 ? "apollo-token" : _ref$tokenName,
+      tokenName = _ref$tokenName === void 0 ? 'apollo-token' : _ref$tokenName,
       _ref$persisting = _ref.persisting,
       persisting = _ref$persisting === void 0 ? false : _ref$persisting,
       _ref$ssr = _ref.ssr,
@@ -46,8 +46,9 @@ export function createApolloClient(_ref) {
   var wsClient, authLink, stateLink;
   var disableHttp = websocketsOnly && !ssr && wsEndpoint;
   var options = {
-    transport: process.server ? W3CWebSocket : null
-  }; // Apollo cache
+    transport: process.server ? W3CWebSocket : null // Apollo cache
+
+  };
 
   if (!cache) {
     cache = new InMemoryCache();
@@ -77,7 +78,7 @@ export function createApolloClient(_ref) {
 
   if (!ssr) {
     // If on the client, recover the injected state
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       // eslint-disable-next-line no-underscore-dangle
       var state = window.__APOLLO_STATE__;
 
@@ -105,6 +106,7 @@ export function createApolloClient(_ref) {
 
 
     if (wsEndpoint) {
+      console.log(tokenName);
       wsClient = new SubscriptionClient(wsEndpoint, {
         reconnect: true,
         connectionParams: function connectionParams() {
@@ -113,9 +115,9 @@ export function createApolloClient(_ref) {
           };
         }
       }); // Create the subscription websocket link
-      //const wsLink = new WebSocketLink(wsClient);
+      // const wsLink = new WebSocketLink(wsClient);
 
-      var wsLink = createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket("wss://murmuring-peak-60537.herokuapp.com/socket/websocket?vsn=2.0.0", options)));
+      var wsLink = createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket('wss://murmuring-peak-60537.herokuapp.com/socket/websocket?vsn=2.0.0', options)));
 
       if (disableHttp) {
         link = wsLink;
@@ -128,7 +130,7 @@ export function createApolloClient(_ref) {
               kind = _getMainDefinition.kind,
               operation = _getMainDefinition.operation;
 
-          return kind === "OperationDefinition" && operation === "subscription";
+          return kind === 'OperationDefinition' && operation === 'subscription';
         }, wsLink, link);
       }
     }
@@ -151,7 +153,7 @@ export function createApolloClient(_ref) {
     // This will temporary disable query force-fetching
     ssrForceFetchDelay: 100,
     // Apollo devtools
-    connectToDevTools: process.env.NODE_ENV !== "production"
+    connectToDevTools: process.env.NODE_ENV !== 'production'
   }, apollo)); // Re-write the client state defaults on cache reset
 
   if (stateLink) {
@@ -181,5 +183,5 @@ function defaultGetAuth(tokenName) {
   // get the authentication token from local storage if it exists
   var token = localStorage.getItem(tokenName); // return the headers to the context so httpLink can read them
 
-  return token ? "Bearer ".concat(token) : "";
+  return token ? "Bearer ".concat(token) : '';
 }
