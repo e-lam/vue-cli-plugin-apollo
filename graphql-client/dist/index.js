@@ -22,7 +22,7 @@ import { Socket as PhoenixSocket } from 'phoenix'; // Create the apollo client
 export function createApolloClient(_ref) {
   var httpEndpoint = _ref.httpEndpoint,
       _ref$wsEndpoint = _ref.wsEndpoint,
-      wsEndpoint = _ref$wsEndpoint === void 0 ? null : _ref$wsEndpoint,
+      wsEndpoint = _ref$wsEndpoint === void 0 ? true : _ref$wsEndpoint,
       _ref$uploadEndpoint = _ref.uploadEndpoint,
       uploadEndpoint = _ref$uploadEndpoint === void 0 ? null : _ref$uploadEndpoint,
       _ref$tokenName = _ref.tokenName,
@@ -33,6 +33,8 @@ export function createApolloClient(_ref) {
       ssr = _ref$ssr === void 0 ? false : _ref$ssr,
       _ref$websocketsOnly = _ref.websocketsOnly,
       websocketsOnly = _ref$websocketsOnly === void 0 ? false : _ref$websocketsOnly,
+      _ref$phoenix = _ref.phoenix,
+      phoenix = _ref$phoenix === void 0 ? false : _ref$phoenix,
       _ref$link = _ref.link,
       link = _ref$link === void 0 ? null : _ref$link,
       _ref$cache = _ref.cache,
@@ -46,9 +48,9 @@ export function createApolloClient(_ref) {
   var wsClient, authLink, stateLink;
   var disableHttp = websocketsOnly && !ssr && wsEndpoint;
   var options = {
-    transport: process.server ? W3CWebSocket : null // Apollo cache
-
+    transport: process.server ? W3CWebSocket : null
   };
+  console.log('phoenix mode : ', phoenix); // Apollo cache
 
   if (!cache) {
     cache = new InMemoryCache();
@@ -105,21 +107,33 @@ export function createApolloClient(_ref) {
     } // Web socket
 
 
-    if (wsEndpoint) {
-      console.log(tokenName);
-      wsClient = new SubscriptionClient(wsEndpoint, {
-        reconnect: true,
-        connectionParams: function connectionParams() {
-          return {
-            authorization: getAuth(tokenName)
-          };
-        }
-      }); // Create the subscription websocket link
-      // const wsLink = new WebSocketLink(wsClient);
+    if (wsEndpoint || phoenix) {
+      var wsLink = null;
 
-      var wsLink = createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket('wss://murmuring-peak-60537.herokuapp.com/socket/websocket?vsn=2.0.0', options)));
+      if (phoenix) {
+        console.log(getAuth(tokenName));
+        var token = getAuth(tokenName).replace(/\s/g, '').split('Bearer');
+        var tokenString = token[1].trim();
+        options = Object.assign(options, {
+          params: {
+            token: tokenString
+          }
+        });
+        wsLink = createAbsintheSocketLink(AbsintheSocket.create(new PhoenixSocket('wss://murmuring-peak-60537.herokuapp.com/socket', options)));
+      } else {
+        wsClient = new SubscriptionClient(wsEndpoint, {
+          reconnect: true,
+          connectionParams: function connectionParams() {
+            return {
+              authorization: getAuth(tokenName)
+            };
+          }
+        }); // Create the subscription websocket link
 
-      if (disableHttp) {
+        wsLink = new WebSocketLink(wsClient);
+      }
+
+      if (disableHttp || phoenix) {
         link = wsLink;
       } else {
         link = split( // split based on operation type

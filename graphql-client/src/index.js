@@ -20,12 +20,13 @@ import { Socket as PhoenixSocket } from 'phoenix'
 // Create the apollo client
 export function createApolloClient ({
   httpEndpoint,
-  wsEndpoint = null,
+  wsEndpoint = true,
   uploadEndpoint = null,
   tokenName = 'apollo-token',
   persisting = false,
   ssr = false,
   websocketsOnly = false,
+  phoenix = false,
   link = null,
   cache = null,
   apollo = {},
@@ -38,6 +39,8 @@ export function createApolloClient ({
   let options = {
     transport: process.server ? W3CWebSocket : null,
   }
+
+  console.log('phoenix mode : ', phoenix)
 
   // Apollo cache
   if (!cache) {
@@ -94,26 +97,41 @@ export function createApolloClient ({
     }
 
     // Web socket
-    if (wsEndpoint) {
-      console.log(tokenName)
-      wsClient = new SubscriptionClient(wsEndpoint, {
-        reconnect: true,
-        connectionParams: () => ({
-          authorization: getAuth(tokenName),
-        }),
-      })
+    if (wsEndpoint || phoenix) {
+      let wsLink = null
+      if (phoenix) {
+        console.log(getAuth(tokenName))
+        let token = getAuth(tokenName)
+          .replace(/\s/g, '')
+          .split('Bearer')
 
-      // Create the subscription websocket link
-      // const wsLink = new WebSocketLink(wsClient);
-      const wsLink = createAbsintheSocketLink(
-        AbsintheSocket.create(
-          new PhoenixSocket(
-            'wss://murmuring-peak-60537.herokuapp.com/socket/websocket?vsn=2.0.0',
-            options
+        let tokenString = token[1].trim()
+
+        options = Object.assign(options, {
+          params: { token: tokenString },
+        })
+
+        wsLink = createAbsintheSocketLink(
+          AbsintheSocket.create(
+            new PhoenixSocket(
+              'wss://murmuring-peak-60537.herokuapp.com/socket',
+              options
+            )
           )
         )
-      )
-      if (disableHttp) {
+      } else {
+        wsClient = new SubscriptionClient(wsEndpoint, {
+          reconnect: true,
+          connectionParams: () => ({
+            authorization: getAuth(tokenName),
+          }),
+        })
+
+        // Create the subscription websocket link
+        wsLink = new WebSocketLink(wsClient)
+      }
+
+      if (disableHttp || phoenix) {
         link = wsLink
       } else {
         link = split(
