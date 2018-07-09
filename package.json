@@ -29,6 +29,11 @@
   },
   "homepage": "https://github.com/Akryum/vue-cli-plugin-apollo#readme",
   "dependencies": {
+    "@vue/cli-plugin-babel": "^3.0.0-rc.3",
+    "@vue/cli-plugin-eslint": "^3.0.0-rc.3",
+    "@vue/cli-service": "^3.0.0-rc.3",
+    "@vue/cli-ui": "^3.0.0-rc.3",
+    "@vue/eslint-config-standard": "^3.0.0-rc.3",
     "apollo-cache-inmemory": "^1.2.5",
     "apollo-client": "^2.3.5",
     "apollo-link": "^1.2.2",
@@ -47,6 +52,8 @@
     "graphql": "^0.13.2",
     "graphql-subscriptions": "^0.5.8",
     "nodemon": "^1.17.5",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
     "subscriptions-transport-ws": "^0.9.12"
   },
   "devDependencies": {
