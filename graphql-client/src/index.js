@@ -40,8 +40,6 @@ export function createApolloClient ({
     transport: process.server ? W3CWebSocket : null,
   }
 
-  console.log('phoenix mode : ', phoenix)
-
   // Apollo cache
   if (!cache) {
     cache = new InMemoryCache()
@@ -100,7 +98,6 @@ export function createApolloClient ({
     if (wsEndpoint || phoenix) {
       let wsLink = null
       if (phoenix) {
-        console.log(getAuth(tokenName))
         let token = getAuth(tokenName)
           .replace(/\s/g, '')
           .split('Bearer')

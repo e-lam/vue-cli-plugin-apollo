@@ -48,9 +48,9 @@ export function createApolloClient(_ref) {
   var wsClient, authLink, stateLink;
   var disableHttp = websocketsOnly && !ssr && wsEndpoint;
   var options = {
-    transport: process.server ? W3CWebSocket : null
+    transport: process.server ? W3CWebSocket : null // Apollo cache
+
   };
-  console.log('phoenix mode : ', phoenix); // Apollo cache
 
   if (!cache) {
     cache = new InMemoryCache();
@@ -111,7 +111,6 @@ export function createApolloClient(_ref) {
       var wsLink = null;
 
       if (phoenix) {
-        console.log(getAuth(tokenName));
         var token = getAuth(tokenName).replace(/\s/g, '').split('Bearer');
         var tokenString = token[1].trim();
         options = Object.assign(options, {
